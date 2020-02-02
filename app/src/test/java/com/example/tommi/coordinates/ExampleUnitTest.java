@@ -1,4 +1,4 @@
-package com.example.tommi.koordinaatit;
+package com.example.tommi.coordinates;
 
 import org.junit.Test;
 

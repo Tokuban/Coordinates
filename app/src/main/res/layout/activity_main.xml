@@ -15,7 +15,7 @@
         android:layout_centerInParent="true">
 
         <TextView
-            android:id="@+id/infobox"
+            android:id="@+id/info_box"
             android:layout_gravity="center_horizontal"
             android:text="Status: Inactive"
             android:layout_weight="1"
@@ -50,7 +50,7 @@
             android:inputType="text"
             android:hint="Comment" />
         <EditText
-            android:id="@+id/ipport_box"
+            android:id="@+id/ip_port_box"
             android:inputType="text"
             android:hint="IP:Port" />
         <LinearLayout

@@ -1,4 +1,4 @@
-package com.example.tommi.koordinaatit;
+package com.example.tommi.coordinates;
 
 import android.Manifest;
 import android.content.Context;
@@ -33,9 +33,9 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE = 1000;
-    TextView infobox;
+    TextView info_box;
     Button btn_start, btn_stop;
-    EditText interval_box, user_box, comment_box, ipport_box;
+    EditText interval_box, user_box, comment_box, ip_port_box;
     Spinner dropdown;
     FusedLocationProviderClient fusedLocationProviderClient;
     LocationRequest locationRequest;
@@ -44,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
     Intent serviceIntent;
     static InetAddress RESOLVED_IP;
     long UNIX1, UNIX2, HOUR, MIN, SEC, INTERVAL_TIMER = 0;
-    String USER, COMMENT, IPPORT = "";
-    String[] IPPORT_SPLIT;
+    String USER, COMMENT, IP_PORT = "";
+    String[] IP_PORT_SPLIT;
     double ALT, LAT1, LAT2, LON1, LON2, SPEED, DISTANCE, TOTAL_DIST, AVG_SPEED, MESSAGES, HELPER_SPEED = 0;
     static int PORT = 0;
     static String MSG;
@@ -72,13 +72,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //Init view
-        infobox = findViewById(R.id.infobox);
+        info_box = findViewById(R.id.info_box);
         btn_start = findViewById(R.id.btn_start_updates);
         btn_stop = findViewById(R.id.btn_stop_updates);
         interval_box = findViewById(R.id.interval_box);
         user_box = findViewById(R.id.user_box);
         comment_box = findViewById(R.id.comment_box);
-        ipport_box = findViewById(R.id.ipport_box);
+        ip_port_box = findViewById(R.id.ip_port_box);
         dropdown = findViewById(R.id.dropdown);
         String[] items = new String[]{"Seconds", "Minutes", "Hours"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
@@ -88,16 +88,16 @@ public class MainActivity extends AppCompatActivity {
         INTERVAL_TIMER = myPrefs.getLong("INTERVAL_TIMER", 0);
         USER = myPrefs.getString("USER", "");
         COMMENT = myPrefs.getString("COMMENT", "");
-        IPPORT = myPrefs.getString("IPPORT", "");
+        IP_PORT = myPrefs.getString("IP_PORT", "");
 
         if (INTERVAL_TIMER != 0) {
             interval_box.setText(String.valueOf(INTERVAL_TIMER));
         }
         user_box.setText(USER);
         comment_box.setText(COMMENT);
-        ipport_box.setText(IPPORT);
+        ip_port_box.setText(IP_PORT);
 
-        infobox.setText(infostring + "\nStatus: Inactive");
+        info_box.setText(infostring + "\nStatus: Inactive");
 
         //Check permission runtime
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -111,22 +111,22 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         if (!started && interval_box.length() != 0 && user_box.length() != 0 && comment_box.length() != 0
-                && ipport_box.length() != 0) {
+                && ip_port_box.length() != 0) {
             buildLocationCallBack();
             fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-            IPPORT = ipport_box.getText().toString();
-            IPPORT_SPLIT = IPPORT.split(":");
-            PORT = Integer.parseInt(IPPORT_SPLIT[1]);
+            IP_PORT = ip_port_box.getText().toString();
+            IP_PORT_SPLIT = IP_PORT.split(":");
+            PORT = Integer.parseInt(IP_PORT_SPLIT[1]);
             INTERVAL_TIMER = Long.parseLong(interval_box.getText().toString());
             USER = user_box.getText().toString();
             COMMENT = comment_box.getText().toString();
-            infobox.setText(infostring + "\nStatus: Initializing...");
-            //tallennetaan
+            info_box.setText(infostring + "\nStatus: Initializing...");
+            //Save input fields
             SharedPreferences.Editor editor = myPrefs.edit();
             editor.putLong("INTERVAL_TIMER", INTERVAL_TIMER);
             editor.putString("USER", USER);
             editor.putString("COMMENT", COMMENT);
-            editor.putString("IPPORT", IPPORT);
+            editor.putString("IP_PORT", IP_PORT);
             editor.apply();
             String spinneritem = dropdown.getSelectedItem().toString();
             if (spinneritem == "Seconds") {
@@ -139,11 +139,11 @@ public class MainActivity extends AppCompatActivity {
             buildLocationRequest();
             new DNSResolve().execute();
         } else if (!started) {
-            infobox.setText(infostring + "\nPlease fill out all fields!");
+            info_box.setText(infostring + "\nPlease fill out all fields!");
         } else if (started) {
             started = false;
             btn_start.setText("Start");
-            infobox.setText(infostring + "\nStatus: Inactive");
+            info_box.setText(infostring + "\nStatus: Inactive");
             fusedLocationProviderClient.removeLocationUpdates(locationCallback);
             stopService(serviceIntent);
             LAT1 = 0;
@@ -155,9 +155,9 @@ public class MainActivity extends AppCompatActivity {
         LAT1 = LAT2 = MESSAGES = TOTAL_DIST = HELPER_SPEED = AVG_SPEED = SEC = MIN = HOUR = 0;
         infostring = "LAT: \nLON: \nALT: \nDistance: \nSpeed: \nMessages Sent: \nTotal Time: \nTotal Dist.: \nAvg. Speed: ";
         if (started) {
-            infobox.setText(infostring + "\nStatus: Active");
+            info_box.setText(infostring + "\nStatus: Active");
         } else if (!started) {
-            infobox.setText(infostring + "\nStatus: Inactive");
+            info_box.setText(infostring + "\nStatus: Inactive");
         }
     }
 
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void dnsfail() {
-        infobox.setText(infostring + "\nDNS Resolve failed!");
+        info_box.setText(infostring + "\nDNS Resolve failed!");
     }
 
     private void buildLocationCallBack() {
@@ -178,14 +178,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
-                    if (LAT1 == 0) { //otetaan ensimmäinen sijainti
+                    if (LAT1 == 0) { //Get initial position
                         PREV_LOCATION = location;
                         LAT1 = location.getLatitude();
                         LON1 = location.getLongitude();
                         UNIX1 = System.currentTimeMillis() / 1000;
-                        infobox.setText(infostring + "\nStatus: Active");
-                    } else { //otetaan muut sijainnit
-                        if (LAT2 != 0) { //alustetaan uusi sijainti
+                        info_box.setText(infostring + "\nStatus: Active");
+                    } else { //Get new position
+                        if (LAT2 != 0) { //Save new position
                             PREV_LOCATION = CUR_LOCATION;
                             LAT1 = LAT2;
                             LON1 = LON2;
@@ -211,18 +211,18 @@ public class MainActivity extends AppCompatActivity {
                                 HOUR++;
                             }
                         }
-                        //Stringataan kaikki
+                        //String everything
                         String ALTS = String.format(Locale.US, "%.1f", ALT);
                         String DISTS = String.format(Locale.US, "%.3f", DISTANCE);
                         String SPEEDS = String.format(Locale.US, "%.3f", SPEED);
                         String AVG_SPEEDS = String.format(Locale.US, "%.3f", AVG_SPEED);
                         String TOTAL_DISTS = String.format(Locale.US, "%.3f", TOTAL_DIST);
                         String MSGS = String.format(Locale.US, "%.0f", MESSAGES);
-                        //Infobox ja viestin lähetys
+                        //Set info_box string and send message
                         infostring = "LAT: " + LAT2 + "\nLON: " + LON2 + "\nALT: " + ALTS + "\nDistance: " + DISTS + " m\nSpeed: " + SPEEDS +
                                 " km/h\nMessages Sent: " + MSGS + "\nTotal Time: " + HOUR + ":" + MIN + ":" + SEC + "\nTotal Dist.: " + TOTAL_DISTS
                                 + " km\nAvg. Speed: " + AVG_SPEEDS + " km/h";
-                        infobox.setText(infostring + "\nStatus: Active");
+                        info_box.setText(infostring + "\nStatus: Active");
                         MSG = "TIMESTAMP:" + UNIX2 + "\tUSER:" + USER + "\tLOCATION:" + LAT2 + "," + LON2 + "\tALTITUDE: " + ALTS + "\tSPEED: " + SPEEDS
                                 + "\tAVG_SPEED: " + AVG_SPEEDS + "\tDISTANCE: " + DISTS +
                                 "\tTOTAL_DISTANCE: " + TOTAL_DISTS + "\tTOTAL_TIME: " + HOUR + ":" + MIN + ":" + SEC + "\tCOMMENT: " + COMMENT;
@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                RESOLVED_IP = InetAddress.getByName(IPPORT_SPLIT[0]);
+                RESOLVED_IP = InetAddress.getByName(IP_PORT_SPLIT[0]);
                 String s = RESOLVED_IP.getHostAddress();
                 RESOLVED_IP = InetAddress.getByName(s);
                 FAILURE = "READY";

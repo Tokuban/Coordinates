@@ -1,4 +1,4 @@
-package com.example.tommi.koordinaatit;
+package com.example.tommi.coordinates;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -8,7 +8,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
-import static com.example.tommi.koordinaatit.App.CHANNEL_ID;
+import static com.example.tommi.coordinates.App.CHANNEL_ID;
 
 public class MyService extends Service {
 
@@ -23,7 +23,7 @@ public class MyService extends Service {
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Koordinaatit")
+                .setContentTitle("Coordinates")
                 .setContentText("Updating location")
                 .setSmallIcon(R.drawable.ic_android)
                 .setContentIntent(pendingIntent)

@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Koordinaatit</string>
+    <string name="app_name">Coordinates</string>
     <color name="colorGreen">#00FF03</color>
 </resources>
